@@ -13,10 +13,35 @@ name = u"阴阳师-网易游戏"
 hwnd = win32gui.FindWindow(None, name)
 # 设置阴阳师窗口大小，需要权限比阴阳师进程高
 win32gui.SetWindowPos(hwnd, win32con.HWND_NOTOPMOST, 0, 0, 1076, 636, win32con.SWP_NOMOVE)
+
 # 获取颜色使用的api
 gdi32 = windll.gdi32
 user32 = windll.user32
 hdc = user32.GetDC(hwnd)  # 获取颜色值
+
+# 待开发
+print(u"选择模式：")
+print(u"1: 组队魂土")
+print(u"2: 单人魂土/痴/日轮/觉醒")
+print(u"3: 御灵")
+print(u"4: 结界突破")
+print(u"5: 道馆突破")
+mode = int(input('请输入序号: '))
+taskPosition = [0, 0]
+taskColor = 0
+clickPosition = [0, 0, 0, 0] # x1, y1, x2, y2
+if mode == 1:
+  taskPosition = [1014, 531]
+  taskColor = 8311532
+  clickPosition = [978, 432, 1050, 590]
+if mode == 2:
+  taskPosition = [958, 502]
+  taskColor = 12572387
+  clickPosition = [910, 484, 1014, 580]
+elif mode == 3:
+  taskPosition = [1014, 531]
+  taskColor = 12703972
+  clickPosition = [900, 480, 1000, 580]
 
 # 鼠标点击
 def doClick(cx, cy):
@@ -53,17 +78,17 @@ def detectTaskInvitation():
   color = getColor(698, 422)
   # 这里参数1是提前测量好的点位颜色
   if similarColors(5597145, color):
-    print(int(time.time()),'-','refuse task')
+    print('refuse task(',int(time.time()),')')
     doClick(702, 425)
 
 # 开始对战
 def startGame():
-  color = getColor(1014, 531)
+  color = getColor(taskPosition[0], taskPosition[1])
   # 这里参数1是提前测量好的点位颜色
-  if similarColors(8311532, color):
-    print(int(time.time()),'-','start game')
-    x = random.randint(978, 1050)
-    y = random.randint(432, 590)
+  if similarColors(taskColor, color):
+    print('start game(',int(time.time()),')')
+    x = random.randint(clickPosition[0], clickPosition[2])
+    y = random.randint(clickPosition[1], clickPosition[3])
     doClick(x, y)
   
 # 检测是否进入结束阶段
@@ -81,17 +106,29 @@ def exitGame():
     time.sleep(random.uniform(0.2, 0.5))
     exitGame()
   else:
-    print(int(time.time()),'-','exit game')
+    print('exit game(',int(time.time()),')')
 
-# def run():
-#   detectTaskInvitation()
-#   if detectSettlement():
-#     exitGame()
-#   startGame()
-#   time.sleep(1)
-#   gc.collect()
-#   return run()
-# run()
+# 结界突破 - 未完成
+def tuPo():
+  i = 1
+  ltcx = ltcy = rbcx = rbcy = x = y = 0
+  utx = 1
+  uty = 0
+  while i <= 9:
+    utx = 1 if i < 4 else 4 if i < 7 else 7
+    uty = 0 if i < 4 else 1 if i < 7 else 2
+    ltcx = int(122 + (i - utx) * 266 + (i - utx) * 10)
+    ltcy = int(122 + uty * 100 + uty * 10)
+    rbcx = ltcx + 266
+    rbcy = ltcy + 100
+    x = ltcx + 133
+    y = ltcy + 14
+    color = getColor(x, y)
+    i = i + 1
+    if similarColors(12439002, color): 
+      doClick(random.randint(ltcx, rbcx), random.randint(ltcy, rbcy))
+      break
+  
 
 class Task:
   def run(self):
@@ -99,10 +136,11 @@ class Task:
     if detectSettlement():
       exitGame()
     startGame()
-    
+
 print('running...')
 while True:
   task = Task()
   task.run()
   time.sleep(1)
   del task
+  gc.collect()
