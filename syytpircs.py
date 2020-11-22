@@ -42,6 +42,10 @@ elif mode == 3:
   taskPosition = [1014, 531]
   taskColor = 12703972
   clickPosition = [900, 480, 1000, 580]
+elif mode == 5:
+  taskPosition = [986, 463]
+  taskColor = 5279444
+  clickPosition = [920, 426, 1020, 514]
 
 # 鼠标点击
 def doClick(cx, cy):
