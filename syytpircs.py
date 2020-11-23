@@ -112,6 +112,20 @@ def exitGame():
   else:
     print('exit game(',int(time.time()),')')
 
+# 是否在突破界面
+def isTuPo():
+  color = getColor(192, 500)
+  return similarColors(4144548, color)
+
+# 是否在突破奖励界面
+def isTuPoReward():
+  color = getColor(260, 196)
+  if similarColors(13816530, color):
+    print('exit game for TuPo(',int(time.time()),')')
+    x = random.randint(738, 1057)
+    y = random.randint(432, 590)
+    doClick(x, y)
+
 # 结界突破 - 测试版
 def tuPo():
   i = 1
@@ -133,18 +147,12 @@ def tuPo():
     srby = slty + 56 # start right bottom y
     color = getColor(x, y)
     i = i + 1
-    print(color)
     if similarColors(12439002, color): 
       print('start game(',int(time.time()),')')
       doClick(random.randint(ltcx, rbcx), random.randint(ltcy, rbcy))
-      time.sleep(0.25)
+      time.sleep(0.5)
       doClick(random.randint(sltx, srbx), random.randint(slty, srby))
       break
-  if i == 10: # 9次已全部打完，需要刷新
-    print('refresh game(',int(time.time()),')')
-    doClick(870, 500)
-    time.sleep(0.25)
-    doClick(630, 358)
   
 
 class Task:
@@ -155,7 +163,9 @@ class Task:
     if detectSettlement():
       exitGame()
     if self.mode == 4:
-      tuPo()
+      isTuPoReward()
+      if isTuPo():
+        tuPo()
     else:
       startGame()
 
