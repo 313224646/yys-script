@@ -12,7 +12,7 @@ import gc
 name = u"阴阳师-网易游戏"
 hwnd = win32gui.FindWindow(None, name)
 # 设置阴阳师窗口大小，需要权限比阴阳师进程高
-win32gui.SetWindowPos(hwnd, win32con.HWND_NOTOPMOST, 0, 0, 1076, 636, win32con.SWP_NOMOVE)
+# win32gui.SetWindowPos(hwnd, win32con.HWND_NOTOPMOST, 0, 0, 1076, 636, win32con.SWP_NOMOVE)
 
 # 获取颜色使用的api
 gdi32 = windll.gdi32
@@ -112,39 +112,58 @@ def exitGame():
   else:
     print('exit game(',int(time.time()),')')
 
-# 结界突破 - 未完成
+# 结界突破 - 测试版
 def tuPo():
   i = 1
   ltcx = ltcy = rbcx = rbcy = x = y = 0
   utx = 1
   uty = 0
   while i <= 9:
-    utx = 1 if i < 4 else 4 if i < 7 else 7
-    uty = 0 if i < 4 else 1 if i < 7 else 2
-    ltcx = int(122 + (i - utx) * 266 + (i - utx) * 10)
-    ltcy = int(122 + uty * 100 + uty * 10)
-    rbcx = ltcx + 266
-    rbcy = ltcy + 100
-    x = ltcx + 133
-    y = ltcy + 14
+    utx = 1 if i < 4 else 4 if i < 7 else 7 # step x 
+    uty = 0 if i < 4 else 1 if i < 7 else 2 # step y
+    ltcx = int(122 + (i - utx) * 266 + (i - utx) * 10) # left top click x
+    ltcy = int(122 + uty * 100 + uty * 10) # left top click y
+    rbcx = ltcx + 266 # right bottom click x
+    rbcy = ltcy + 100 # right bottom click y
+    x = ltcx + 133 # task point x
+    y = ltcy + 14 # task point y
+    sltx = ltcx + 144 # start left top x
+    slty = ltcy + 174 # start left top y
+    srbx = sltx + 112 # start right bottom x
+    srby = slty + 56 # start right bottom y
     color = getColor(x, y)
     i = i + 1
+    print(color)
     if similarColors(12439002, color): 
+      print('start game(',int(time.time()),')')
       doClick(random.randint(ltcx, rbcx), random.randint(ltcy, rbcy))
+      time.sleep(0.25)
+      doClick(random.randint(sltx, srbx), random.randint(slty, srby))
       break
+  if i == 10: # 9次已全部打完，需要刷新
+    print('refresh game(',int(time.time()),')')
+    doClick(870, 500)
+    time.sleep(0.25)
+    doClick(630, 358)
   
 
 class Task:
+  def __init__(self, mode):
+    self.mode = mode
   def run(self):
     detectTaskInvitation()
     if detectSettlement():
       exitGame()
-    startGame()
+    if self.mode == 4:
+      tuPo()
+    else:
+      startGame()
 
 print('running...')
 while True:
-  task = Task()
+  task = Task(mode)
   task.run()
   time.sleep(1)
+  # 防止内存泄漏
   del task
   gc.collect()
