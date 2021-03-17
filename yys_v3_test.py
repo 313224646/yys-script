@@ -16,6 +16,7 @@ USER32 = windll.user32
 HDC = USER32.GetDC(HWND)  # 获取颜色值
 win32gui.SetWindowPos(HWND, win32con.HWND_NOTOPMOST, 0, 0, 1076, 636, win32con.SWP_NOMOVE)  # 设置阴阳师窗口大小，需要权限比阴阳师进程高
 
+# 用于设置各种场景的检测点
 POINTS = {
   'task': {
     'x': 698,
@@ -54,6 +55,7 @@ POINTS = {
   }
 }
 
+# 用于设置各种场景点击区域
 MATRIX = {
   'rejectTask': {
     'x1': 702,
@@ -164,25 +166,17 @@ class HunTu(Game):
     matrixStart = MATRIX['hunTuStart']
     color = globalGetColor(pointStart['x'], pointStart['y'])
     if globalCompareColors(pointStart['color'], color):
+      # print('game ready') # test handle
       globalClick(
         random.randint(matrixStart['x1'], matrixStart['x2']),
         random.randint(matrixStart['y1'], matrixStart['y2'])
       )
     else:
-      time.sleep(2)
+      # print('game not ready') # test handle
+      time.sleep(0.5)
       self.ready()
-  def endingA(self):
-    self.player.taskInvitation()
-    self.player.teamUp()
-    point = POINTS['hunTuEndingA']
-    matrixExit = MATRIX['hunTuExit']
-    color = globalGetColor(point['x'], point['y'])
-    if globalCompareColors(point['color'], color):
-      return
-    else:
-      time.sleep(1)
-      self.endingA()
-  def endingB(self):
+    # print('game start') # test handle
+  def ending(self, isEnding = False):
     self.player.taskInvitation()
     self.player.teamUp()
     pointEndingA = POINTS['hunTuEndingA']
@@ -190,14 +184,27 @@ class HunTu(Game):
     matrixExit = MATRIX['hunTuExit']
     colorA = globalGetColor(pointEndingA['x'], pointEndingA['y'])
     colorB = globalGetColor(pointEndingB['x'], pointEndingB['y'])
-    if globalCompareColors(pointEndingA['color'], colorA) or globalCompareColors(pointEndingB['color'], colorB):
+    testA = globalCompareColors(pointEndingA['color'], colorA)
+    testB = globalCompareColors(pointEndingB['color'], colorB)
+    if bool(1 - isEnding):
+      time.sleep(0.5)
+      if testA or testB:
+        # print('game ending') # test handle
+        self.ending(True)
+      else:
+        # print('game not ending') # test handle
+        self.ending()
+      
+    if testA or testB:
+      # print('game will ending') # test handle
       globalClick(
         random.randint(matrixExit['x1'], matrixExit['x2']),
         random.randint(matrixExit['y1'], matrixExit['y2'])
       )
-      time.sleep(1)
-      self.endingB()
-     
+      time.sleep(0.5)
+      self.ending(True)
+    # print('game over') # test handle
+
 # 主流程
 print(u"由于开发时间有限, 目前仅支持魂土")
 print(u"1: 队长")
@@ -213,7 +220,6 @@ while True:
   count += 1
   if mode == 1:
     game.ready()
-  game.endingA()
-  game.endingB()
+  game.ending()
+  time.sleep(0.5)
   gc.collect()
-  time.sleep(5)
