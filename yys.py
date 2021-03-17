@@ -76,8 +76,8 @@ def detectBreakthroughUI(): # 检测是否在突破界面
   return similarColors(DETECT_COLOR, color)
 
 def detectSettlement(): # 检测是否进入结束阶段
-  color = getColor(146, 555)
-  return similarColors(2090231, color)
+  color = getColor(157, 556)
+  return similarColors(631004, color)
 
 def detectBreakthroughRewardUI(): # 检测是否在突破奖励界面
   color = getColor(260, 196)
