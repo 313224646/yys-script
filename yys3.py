@@ -23,20 +23,35 @@ POINTS = {
     'y': 422,
     'color': 5597145
   },
-  'hunTuStart': {
+  'start': {
+    'x': 958,
+    'y': 502,
+    'color': 12572387
+  },
+  'startYuLing': {
+    'x': 950,
+    'y': 500,
+    'color': 12769765
+  },
+  'startYuhunTeam': {
     'x': 1014,
     'y': 531,
     'color': 8311532
   },
-  'hunTuEndingA': {
+  'endingMarkA': {
     'x': 68,
     'y': 52,
     'color': 2108221
   },
-  'hunTuEndingB': {
+  'endingMarkB': {
     'x': 60,
     'y': 546,
     'color': 5735338
+  },
+  'endingMarkYuLing': {
+    'x': 98,
+    'y': 516,
+    'color': 924710
   },
   'teamUp': {
     'x': 364,
@@ -63,13 +78,13 @@ MATRIX = {
     'x2': 702,
     'y2': 425
   },
-  'hunTuStart': {
-    'x1': 968,
-    'y1': 492,
-    'x2': 1050,
-    'y2': 572
+  'start': {
+    'x1': 910,
+    'y1': 484,
+    'x2': 1014,
+    'y2': 580
   },
-  'hunTuExit': {
+  'ending': {
     'x1': 768,
     'y1': 402,
     'x2': 1048,
@@ -86,6 +101,12 @@ MATRIX = {
     'y1': 358,
     'x2': 630,
     'y2': 358
+  },
+  'startYuhunTeam': {
+    'x1': 968,
+    'y1': 492,
+    'x2': 1050,
+    'y2': 572
   }
 }
 
@@ -148,40 +169,27 @@ class Member(Onmyoji):
       globalClick(pointBeTeam['x'], pointBeTeam['y'])
 
 class Game:
-  def __init__(self, player):
+  def __init__(self, player, startPoint, startMatrix):
     self.player = player
-  def ready(self):
-    pass
-  def start(self):
-    pass
-  def ending(self):
-    pass
-  def teammateInvitation(self):
-    pass
-  
-class HunTu(Game):
+    self.startPoint = startPoint
+    self.startMatrix = startMatrix
   def ready(self):
     self.player.taskInvitation()
-    pointStart = POINTS['hunTuStart']
-    matrixStart = MATRIX['hunTuStart']
-    color = globalGetColor(pointStart['x'], pointStart['y'])
-    if globalCompareColors(pointStart['color'], color):
-      # print('game ready') # test handle
+    color = globalGetColor(self.startPoint['x'], self.startPoint['y'])
+    if globalCompareColors(self.startPoint['color'], color):
       globalClick(
-        random.randint(matrixStart['x1'], matrixStart['x2']),
-        random.randint(matrixStart['y1'], matrixStart['y2'])
+        random.randint(self.startMatrix['x1'], self.startMatrix['x2']),
+        random.randint(self.startMatrix['y1'], self.startMatrix['y2'])
       )
     else:
-      # print('game not ready') # test handle
       time.sleep(0.5)
       self.ready()
-    # print('game start') # test handle
   def ending(self, isEnding = False):
     self.player.taskInvitation()
     self.player.teamUp()
-    pointEndingA = POINTS['hunTuEndingA']
-    pointEndingB = POINTS['hunTuEndingB']
-    matrixExit = MATRIX['hunTuExit']
+    pointEndingA = POINTS['endingMarkA']
+    pointEndingB = POINTS['endingMarkB']
+    matrixExit = MATRIX['ending']
     colorA = globalGetColor(pointEndingA['x'], pointEndingA['y'])
     colorB = globalGetColor(pointEndingB['x'], pointEndingB['y'])
     testA = globalCompareColors(pointEndingA['color'], colorA)
@@ -189,36 +197,71 @@ class HunTu(Game):
     if bool(1 - isEnding):
       time.sleep(0.5)
       if testA or testB:
-        # print('game ending') # test handle
         self.ending(True)
       else:
-        # print('game not ending') # test handle
         self.ending()
-      
     if testA or testB:
-      # print('game will ending') # test handle
       globalClick(
         random.randint(matrixExit['x1'], matrixExit['x2']),
         random.randint(matrixExit['y1'], matrixExit['y2'])
       )
       time.sleep(0.5)
       self.ending(True)
-    # print('game over') # test handle
+  def teammateInvitation(self):
+    pass
+  
+class YuLingGame(Game):
+  def ending(self, isEnding = False):
+    self.player.taskInvitation()
+    point = POINTS['endingMarkYuLing']
+    matrixExit = MATRIX['ending']
+    color = globalGetColor(point['x'], point['y'])
+    test = globalCompareColors(point['color'], color)
+    if bool(1 - isEnding):
+      time.sleep(0.5)
+      if test:
+        self.ending(True)
+      else:
+        self.ending()
+    if test:
+      globalClick(
+        random.randint(matrixExit['x1'], matrixExit['x2']),
+        random.randint(matrixExit['y1'], matrixExit['y2'])
+      )
+      time.sleep(0.5)
+      self.ending(True)
+
+def getPlayer(mode):
+  if mode == 1:
+    return Leader()
+  elif mode == 2:
+    return Member()
+  else:
+    return Onmyoji()
+
+def getGame(player, mode):
+  if mode == 1 or mode == 2:
+    return Game(player, POINTS['startYuhunTeam'], MATRIX['startYuhunTeam'])
+  if mode == 4:
+    return YuLingGame(player, POINTS['startYuLing'], MATRIX['start'])
+  else:
+    return Game(player, POINTS['start'], MATRIX['start'])
 
 # 主流程
-print(u"由于开发时间有限, 目前仅支持魂土")
-print(u"1: 队长")
-print(u"2: 队员")
+print(u"1: 御魂队长")
+print(u"2: 御魂队员 or 探索自动退出")
+print(u"3: 业原火")
+print(u"4: 御灵")
 
 mode = int(input("请输入序号: "))
 count = 1
-player = Leader() if mode == 1 else Member()
-game = HunTu(player)
+player = getPlayer(mode)
+game = getGame(player, mode)
 
 while True:
   print('number of runs: ', count)
   count += 1
-  if mode == 1:
+  if mode != 2:
     game.ready()
   game.ending()
   time.sleep(0.5)
